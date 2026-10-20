@@ -14,9 +14,16 @@ class Album():
 # schema 
 
 class AlbumSchema(Schema):
-    title = fields.String()
-    artist = fields.String()
-    num_sold = fields.Int()
+    title = fields.String(required=True)
+    artist = fields.String(required=True)
+    num_sold = fields.Int(required=True)
+    big_hit = fields.Boolean(dump_only = true)
+
+    # compute field prior to serialization
+    @pre_dump()
+    def get_data(self, data, **kwargs):
+        data.big_hit = data.num_sold > 1000000
+        return data
     
     
 # create model and schema instances
@@ -27,7 +34,8 @@ schema = AlbumSchema()
 # deserialize model instances
 
 pprint(schema.dumps(album_1))
-# => '{"title": "The Wall", "artist": "Pink Floyd", "num_sold": 19000000}'
+# => '{"title": "The Wall", "artist": "Pink Floyd", "num_sold": 19000000, "big_hit: true"}'
 
 pprint(schema.dumps(album_2))
-# => '{"title": "Renaissance", "artist": "Beyonce", "num_sold": 332000}'
+# => '{"title": "Renaissance", "artist": "Beyonce", "num_sold": 332000, "big_hit": false}'
+
